@@ -69,21 +69,25 @@ Für eine einzelne Werkstatt bleibt das in der Praxis meist dauerhaft im kostenl
 
 ## 6. Zementa – Wöchentlicher Aktivitäts-Bot
 
-**Zementa** ist dein wöchentlicher Überblick über alle Werkstatt-Aktivitäten: neue Vorgänge,
-abgeschlossene Fälle, Termine, Angebote und die komplette Historie – als Dashboard in der App
-und optional per E-Mail.
+**Zementa** schreibt dir einmal die Woche einen persönlichen Wochenbrief über alle
+Werkstatt-Aktivitäten – an **deine E-Mail** (`lazarek.johann@gmail.com`), unterschrieben
+als Zementa, **nicht** als Cursor-Bot.
 
 ### Einrichtung (einmalig)
 
 1. Im Supabase **SQL Editor** zusätzlich `supabase/zementa.sql` ausführen (nach `schema.sql`).
-2. In der App links **Zementa** öffnen → E-Mail-Adresse und Wochentag eintragen → speichern.
+2. In der App links **Zementa** öffnen → Name, Empfänger- und Absender-E-Mail prüfen → speichern.
 3. Optional – automatischer E-Mail-Versand:
    - Edge Function deployen: `supabase functions deploy zementa-weekly`
-   - Secrets setzen: `RESEND_API_KEY`, `ZEMENTA_CRON_SECRET`, `ZEMENTA_FROM_EMAIL`
+   - Secrets setzen:
+     - `RESEND_API_KEY` – Versand über Resend
+     - `ZEMENTA_FROM_EMAIL` – verifizierte Absender-Domain bei Resend, z. B. `Zementa <berichte@deine-werkstatt.de>`
+       (Gmail selbst kann Resend nicht als From setzen; **Reply-To** ist deine Gmail aus den Einstellungen)
+     - `ZEMENTA_CRON_SECRET` – zufälliger String
    - GitHub Repository Secrets: `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `ZEMENTA_CRON_SECRET`
-   - Der GitHub Actions Workflow (`.github/workflows/zementa-weekly.yml`) ruft jeden Montag die Function auf.
+   - Der Workflow (`.github/workflows/zementa-weekly.yml`) ruft jeden Montag die Function auf.
 
-Ohne E-Mail-Setup funktioniert das **Dashboard sofort** – du siehst alle Wochen-Aktivitäten live in der App.
+Ohne E-Mail-Setup funktioniert das **Dashboard sofort** – die Mail-Vorschau siehst du live unter Zementa.
 
 ## 7. Nächste Ausbaustufen (siehe auch Roadmap aus dem Chat)
 

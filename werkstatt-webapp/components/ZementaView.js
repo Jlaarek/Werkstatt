@@ -72,7 +72,10 @@ export default function ZementaView({ cases, openCase, showToast }) {
   const [savedReports, setSavedReports] = useState([]);
   const [settings, setSettings] = useState(null);
   const [settingsForm, setSettingsForm] = useState({
-    notification_email: "",
+    notification_email: "lazarek.johann@gmail.com",
+    sender_email: "lazarek.johann@gmail.com",
+    sender_name: "Zementa",
+    recipient_name: "Johann",
     notify_day: 1,
     notify_hour: 8,
     enabled: true,
@@ -107,7 +110,10 @@ export default function ZementaView({ cases, openCase, showToast }) {
     if (!settingsRes.error && settingsRes.data) {
       setSettings(settingsRes.data);
       setSettingsForm({
-        notification_email: settingsRes.data.notification_email || "",
+        notification_email: settingsRes.data.notification_email || "lazarek.johann@gmail.com",
+        sender_email: settingsRes.data.sender_email || settingsRes.data.notification_email || "lazarek.johann@gmail.com",
+        sender_name: settingsRes.data.sender_name || "Zementa",
+        recipient_name: settingsRes.data.recipient_name || "Johann",
         notify_day: settingsRes.data.notify_day ?? 1,
         notify_hour: settingsRes.data.notify_hour ?? 8,
         enabled: settingsRes.data.enabled ?? true,
@@ -187,7 +193,11 @@ export default function ZementaView({ cases, openCase, showToast }) {
     setGenerating(false);
   }
 
-  const digestPreview = buildDigestText(summary, settingsForm.workshop_name);
+  const digestPreview = buildDigestText(
+    summary,
+    settingsForm.workshop_name,
+    settingsForm.recipient_name || "Johann",
+  );
 
   return (
     <div>
@@ -347,6 +357,14 @@ export default function ZementaView({ cases, openCase, showToast }) {
           ) : (
             <div className="space-y-3">
               <label className="block">
+                <span className="text-xs text-slate-500">Dein Name (Anrede in der Mail)</span>
+                <input
+                  className="mt-1 w-full border border-slate-300 rounded-lg px-3 py-2 text-sm"
+                  value={settingsForm.recipient_name}
+                  onChange={e => setSettingsForm(f => ({ ...f, recipient_name: e.target.value }))}
+                />
+              </label>
+              <label className="block">
                 <span className="text-xs text-slate-500">Werkstatt-Name</span>
                 <input
                   className="mt-1 w-full border border-slate-300 rounded-lg px-3 py-2 text-sm"
@@ -355,14 +373,35 @@ export default function ZementaView({ cases, openCase, showToast }) {
                 />
               </label>
               <label className="block">
-                <span className="text-xs text-slate-500">E-Mail für Wochenbericht</span>
+                <span className="text-xs text-slate-500">Empfänger-E-Mail (wo der Bericht ankommt)</span>
                 <input
                   type="email"
                   className="mt-1 w-full border border-slate-300 rounded-lg px-3 py-2 text-sm"
-                  placeholder="leitung@werkstatt.de"
+                  placeholder="lazarek.johann@gmail.com"
                   value={settingsForm.notification_email}
                   onChange={e => setSettingsForm(f => ({ ...f, notification_email: e.target.value }))}
                 />
+              </label>
+              <label className="block">
+                <span className="text-xs text-slate-500">Absender-Name</span>
+                <input
+                  className="mt-1 w-full border border-slate-300 rounded-lg px-3 py-2 text-sm"
+                  value={settingsForm.sender_name}
+                  onChange={e => setSettingsForm(f => ({ ...f, sender_name: e.target.value }))}
+                />
+              </label>
+              <label className="block">
+                <span className="text-xs text-slate-500">Absender-E-Mail (deine Adresse, Reply-To)</span>
+                <input
+                  type="email"
+                  className="mt-1 w-full border border-slate-300 rounded-lg px-3 py-2 text-sm"
+                  placeholder="lazarek.johann@gmail.com"
+                  value={settingsForm.sender_email}
+                  onChange={e => setSettingsForm(f => ({ ...f, sender_email: e.target.value }))}
+                />
+                <span className="text-xs text-slate-400 mt-1 block">
+                  Die Mail kommt als Zementa an dich – Antworten gehen an deine Adresse, nicht an Cursor.
+                </span>
               </label>
               <div className="grid grid-cols-2 gap-3">
                 <label className="block">
