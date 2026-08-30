@@ -85,7 +85,45 @@ und optional per E-Mail.
 
 Ohne E-Mail-Setup funktioniert das **Dashboard sofort** – du siehst alle Wochen-Aktivitäten live in der App.
 
-## 7. Nächste Ausbaustufen (siehe auch Roadmap aus dem Chat)
+## 7. Checker – Schritt-Prüfer (Zementa-Integration)
+
+**Checker** prüft alle Workflow-Schritte deiner Vorgänge und bewertet deren Qualität:
+
+1. **Anlage** – Kundendaten und Anliegen vollständig?
+2. **Prüfung** – Anliegen bearbeitet, Termin angefragt?
+3. **Angebot** – Angebot erstellt und versendet?
+4. **Termin** – Termin bestätigt und termingerecht?
+5. **Abschluss** – Vorgang ordnungsgemäß abgeschlossen?
+
+In der App links **Checker** öffnen → alle Vorgänge mit Score (0–100), Schritt-Status und Auffälligkeiten sehen.
+
+Checker arbeitet **zusammen mit Zementa**: Die Bewertungen fließen automatisch in den wöchentlichen Zementa-Bericht und die E-Mail-Benachrichtigung ein (Qualitäts-Score, auffällige Vorgänge, häufigste Probleme).
+
+## 8. Bot-Suite – Alle Bots verbunden (wie Säp)
+
+Unter **Bots** in der Navigation findest du die gemeinsame Suite:
+
+| Bot | Rolle | Verbindungen |
+|---|---|---|
+| **Säp** | App-Builder | Supabase · GitHub · Netlify |
+| **Checker** | Schritt-Prüfer | Supabase · GitHub · Netlify |
+| **Zementa** | Wochenbericht | Supabase · GitHub · Netlify |
+
+**Ein Stack für alle** (gleiche Konten wie bei Säp):
+
+1. **Supabase** – ein Projekt für Werkstatt-Daten (`schema.sql` + `zementa.sql`) und Säp-Apps (`saep/supabase/schema.sql`)
+2. **GitHub** – dieses Repo + Actions (Zementa-Cron) + Säp-App-Export
+3. **Netlify** – Deploy aus `werkstatt-webapp/` bzw. `saep/` (`netlify.toml` jeweils vorhanden)
+
+Säp starten:
+
+```bash
+cd saep
+cp .env.local.example .env.local   # gleiche SUPABASE_URL + ANON_KEY
+npm install && npm run dev
+```
+
+## 9. Nächste Ausbaustufen (siehe auch Roadmap aus dem Chat)
 
 Im Code stehen `TODO`-Kommentare an den Stellen, wo später Telefonie,
 Kalender-Sync, Teilekatalog-API und die Claude API angebunden werden können
