@@ -255,7 +255,10 @@ export function buildDigestText(summary, workshopName = "Kfz-Werkstatt", recipie
   }
 
   const tip = focusHint(k);
-  if (tip) lines.push(tip.trimStart());
+  if (tip) {
+    lines.push("");
+    lines.push(tip.trim());
+  }
 
   lines.push(
     "",
