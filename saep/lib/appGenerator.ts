@@ -61,6 +61,12 @@ export const TEMPLATES = [
     icon: "🏥",
     prompt: "Gesundheits-App mit Terminbuchung, Medikamentenplan und Dokumenten",
   },
+  {
+    id: "salon",
+    label: "Friseur",
+    icon: "💇",
+    prompt: "Friseur-App mit Terminbuchung, Leistungskatalog, Kundendaten und Salon-Dashboard",
+  },
 ];
 
 const CATEGORY_KEYWORDS: Record<string, { keywords: string[]; icon: string; color: string; secondary: string }> = {
@@ -95,10 +101,16 @@ const CATEGORY_KEYWORDS: Record<string, { keywords: string[]; icon: string; colo
     secondary: "#f472b6",
   },
   health: {
-    keywords: ["gesundheit", "arzt", "medizin", "patient", "termin", "kranken"],
+    keywords: ["gesundheit", "arzt", "medizin", "patient", "kranken"],
     icon: "🏥",
     color: "#10b981",
     secondary: "#34d399",
+  },
+  salon: {
+    keywords: ["friseur", "salon", "haarschnitt", "balayage", "stylist", "barber", "nagel", "beauty", "dienstleister"],
+    icon: "💇",
+    color: "#db2777",
+    secondary: "#f472b6",
   },
   education: {
     keywords: ["schule", "lernen", "kurs", "unterricht", "bildung", "student"],
@@ -185,6 +197,7 @@ function extractAppName(text: string, category: string): string {
     werkstatt: "WerkstattPro",
     event: "EventHub",
     health: "HealthCare+",
+    salon: "SalonFlow",
     education: "LearnSpace",
     travel: "TravelGo",
     custom: "MeineApp",
@@ -275,6 +288,16 @@ function generateScreens(category: string, features: AppFeature[]): AppScreen[] 
         { title: "Physio", subtitle: "Rücken • Fr 11:00", icon: "💆" },
       ],
     },
+    salon: {
+      id: "appointments",
+      title: "Termine",
+      type: "list",
+      items: [
+        { title: "Lisa Berger · Balayage", subtitle: "Heute 10:00 · Anna", badge: "Bestätigt", icon: "💇" },
+        { title: "Tom Weber · Herrenhaarschnitt", subtitle: "Heute 11:30 · Marc", badge: "Neu", icon: "✂️" },
+        { title: "Julia Hoffmann · Brautstyling", subtitle: "Sa 09:00 · Anna", badge: "Hochzeit", icon: "👰" },
+      ],
+    },
   };
 
   const listScreen = listItems[category] || {
@@ -319,6 +342,11 @@ function generateStats(category: string): { label: string; value: string; trend?
       { label: "Offene Aufträge", value: "12", trend: "-3" },
       { label: "Heute fertig", value: "5", trend: "+2" },
       { label: "Umsatz", value: "€3.1k", trend: "+11%" },
+    ],
+    salon: [
+      { label: "Termine heute", value: "8", trend: "+2" },
+      { label: "Umsatz", value: "€624", trend: "+14%" },
+      { label: "Auslastung", value: "86%", trend: "+5%" },
     ],
     default: [
       { label: "Nutzer", value: "248", trend: "+12%" },
