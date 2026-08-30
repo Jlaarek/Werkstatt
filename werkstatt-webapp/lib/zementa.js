@@ -181,46 +181,183 @@ export function aggregateWeeklyActivity(cases, weekStartIso, weekEndIso) {
   };
 }
 
-export function buildDigestText(summary, workshopName = "Kfz-Werkstatt") {
+function plural(n, one, many) {
+  return `${n} ${n === 1 ? one : many}`;
+}
+
+function weekIntro(k) {
+  if (k.newCasesCount === 0 && k.completedCount === 0 && k.activityCount === 0) {
+    return "Diese Woche war es ruhig bei euch – keine großen Bewegungen in den Vorgängen. Manchmal ist genau das die beste Nachricht.";
+  }
+  if (k.completedCount > 0 && k.newCasesCount > 0) {
+    return `Eine produktive Woche liegt hinter euch: ${plural(k.newCasesCount, "neuer Vorgang", "neue Vorgänge")} rein, ${plural(k.completedCount, "Fall", "Fälle")} abgeschlossen. Der Laden läuft.`;
+  }
+  if (k.newCasesCount > 3) {
+    return `Es war eine lebhafte Woche – ${plural(k.newCasesCount, "neuer Vorgang ist", "neue Vorgänge sind")} reingekommen. Gut, dass ihr den Überblick behaltet.`;
+  }
+  if (k.completedCount > 0) {
+    return `Diese Woche konntet ihr ${plural(k.completedCount, "Vorgang", "Vorgänge")} sauber abschließen. Das zählt.`;
+  }
+  return "Hier ist euer kompakter Wochenüberblick – alles Wichtige auf einen Blick.";
+}
+
+function focusHint(k) {
+  const hints = [];
+  if (k.callbacksCount > 0) {
+    hints.push(`${plural(k.callbacksCount, "offener Rückruf wartet", "offene Rückrufe warten")} noch – lohnt sich, das früh am Wochenbeginn anzugehen`);
+  }
+  if (k.openAtWeekEnd > 5) {
+    hints.push(`mit ${k.openAtWeekEnd} offenen Vorgängen lohnt ein kurzer Blick auf die Prioritäten`);
+  }
+  if (k.quotesCount > 0 && k.completedCount === 0) {
+    hints.push("Angebote sind raus – die Nachverfolgung entscheidet oft über den Auftrag");
+  }
+  if (hints.length === 0) return "";
+  return `\n\nMein Tipp für die kommende Woche: ${hints.join("; ")}.`;
+}
+
+/** Persönlicher Wochenbrief von Zementa (Klartext) */
+export function buildDigestText(summary, workshopName = "Kfz-Werkstatt", recipientName = "Johann") {
   const k = summary.kpis;
   const lines = [
-    `🧱 Zementa – Wochenbericht ${summary.weekLabel}`,
-    `${workshopName}`,
+    `Hallo ${recipientName},`,
     "",
-    "📊 Kennzahlen",
-    `• Neue Vorgänge: ${k.newCasesCount}`,
-    `• Abgeschlossen: ${k.completedCount}`,
-    `• Termine angefragt: ${k.appointmentsCount}`,
-    `• Angebote erstellt: ${k.quotesCount}`,
-    `• Offene Rückrufe: ${k.callbacksCount}`,
-    `• Angebotsvolumen: ${formatCurrency(k.totalQuoteValue)}`,
-    `• Noch offen gesamt: ${k.openAtWeekEnd}`,
+    weekIntro(k),
     "",
+    `Wochenbericht für ${workshopName}`,
+    `Zeitraum: ${summary.weekLabel}`,
+    "",
+    "─── Kurzüberblick ───",
+    `Neue Vorgänge:        ${k.newCasesCount}`,
+    `Abgeschlossen:        ${k.completedCount}`,
+    `Termine angefragt:    ${k.appointmentsCount}`,
+    `Angebote erstellt:    ${k.quotesCount}`,
+    `Angebotsvolumen:      ${formatCurrency(k.totalQuoteValue)}`,
+    `Offene Rückrufe:      ${k.callbacksCount}`,
+    `Noch offen gesamt:    ${k.openAtWeekEnd}`,
   ];
 
   if (summary.topConcerns?.length) {
-    lines.push("🔧 Häufigste Anliegen");
+    lines.push("", "─── Was die Kunden beschäftigt hat ───");
     for (const t of summary.topConcerns) {
-      lines.push(`• ${t.concern} (${t.count}x)`);
+      lines.push(`• ${t.concern} (${t.count}×)`);
     }
-    lines.push("");
   }
 
   if (summary.activities?.length) {
-    lines.push("📋 Letzte Aktivitäten");
-    for (const a of summary.activities.slice(0, 10)) {
+    lines.push("", "─── Die wichtigsten Momente ───");
+    for (const a of summary.activities.slice(0, 8)) {
       const ts = a.timestamp instanceof Date
-        ? a.timestamp.toLocaleString("de-DE")
+        ? a.timestamp.toLocaleString("de-DE", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })
         : (a.timestamp || "");
-      lines.push(`• ${ts}: ${a.label}`);
+      lines.push(`• ${ts} – ${a.label}`);
     }
-    lines.push("");
   }
 
-  lines.push("—");
-  lines.push("Im Dashboard unter „Zementa“ findest du den vollständigen Wochenüberblick.");
+  const tip = focusHint(k);
+  if (tip) {
+    lines.push("");
+    lines.push(tip.trim());
+  }
+
+  lines.push(
+    "",
+    "Den vollständigen Überblick mit Timeline und Archiv findest du jederzeit im Dashboard unter „Zementa“.",
+    "",
+    "Einen guten Start in die neue Woche –",
+    "Zementa",
+    `dein Wochenüberblick für ${workshopName}`,
+  );
 
   return lines.join("\n");
+}
+
+/** HTML-Version des Wochenbriefs */
+export function buildDigestHtml(summary, workshopName = "Kfz-Werkstatt", recipientName = "Johann") {
+  const k = summary.kpis;
+  const tip = focusHint(k).trim();
+
+  const kpiRow = (label, value) => `
+    <tr>
+      <td style="padding:8px 0;border-bottom:1px solid #e2e8f0;color:#475569;font-size:14px;">${label}</td>
+      <td style="padding:8px 0;border-bottom:1px solid #e2e8f0;color:#0f172a;font-size:14px;font-weight:600;text-align:right;">${value}</td>
+    </tr>`;
+
+  let concernsHtml = "";
+  if (summary.topConcerns?.length) {
+    concernsHtml = `
+      <h2 style="margin:28px 0 12px;font-size:15px;color:#0f172a;">Was die Kunden beschäftigt hat</h2>
+      <ul style="margin:0;padding-left:18px;color:#334155;font-size:14px;line-height:1.7;">
+        ${summary.topConcerns.map(t => `<li>${t.concern} <span style="color:#94a3b8;">(${t.count}×)</span></li>`).join("")}
+      </ul>`;
+  }
+
+  let activitiesHtml = "";
+  if (summary.activities?.length) {
+    activitiesHtml = `
+      <h2 style="margin:28px 0 12px;font-size:15px;color:#0f172a;">Die wichtigsten Momente</h2>
+      <ul style="margin:0;padding:0;list-style:none;">
+        ${summary.activities.slice(0, 8).map(a => {
+          const ts = a.timestamp instanceof Date
+            ? a.timestamp.toLocaleString("de-DE", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })
+            : "";
+          return `<li style="padding:10px 0;border-bottom:1px solid #f1f5f9;font-size:14px;color:#334155;">
+            <span style="color:#94a3b8;font-size:12px;">${ts}</span><br/>${a.label}
+          </li>`;
+        }).join("")}
+      </ul>`;
+  }
+
+  return `<!DOCTYPE html>
+<html lang="de">
+<body style="margin:0;padding:0;background:#f1f5f9;font-family:Georgia,'Times New Roman',serif;">
+  <div style="max-width:560px;margin:0 auto;padding:32px 16px;">
+    <div style="background:#ffffff;border-radius:16px;padding:36px 32px;box-shadow:0 1px 3px rgba(15,23,42,0.08);">
+      <p style="margin:0 0 4px;font-size:12px;letter-spacing:0.08em;text-transform:uppercase;color:#ea580c;font-family:system-ui,sans-serif;font-weight:600;">Zementa</p>
+      <h1 style="margin:0 0 8px;font-size:22px;color:#0f172a;font-weight:700;">Dein Wochenbericht</h1>
+      <p style="margin:0 0 24px;font-size:13px;color:#64748b;font-family:system-ui,sans-serif;">${workshopName} · ${summary.weekLabel}</p>
+
+      <p style="margin:0 0 20px;font-size:16px;line-height:1.65;color:#1e293b;">Hallo ${recipientName},</p>
+      <p style="margin:0 0 28px;font-size:16px;line-height:1.65;color:#1e293b;">${weekIntro(k)}</p>
+
+      <table style="width:100%;border-collapse:collapse;font-family:system-ui,sans-serif;">
+        ${kpiRow("Neue Vorgänge", k.newCasesCount)}
+        ${kpiRow("Abgeschlossen", k.completedCount)}
+        ${kpiRow("Termine angefragt", k.appointmentsCount)}
+        ${kpiRow("Angebote erstellt", k.quotesCount)}
+        ${kpiRow("Angebotsvolumen", formatCurrency(k.totalQuoteValue))}
+        ${kpiRow("Offene Rückrufe", k.callbacksCount)}
+        ${kpiRow("Noch offen gesamt", k.openAtWeekEnd)}
+      </table>
+
+      ${concernsHtml}
+      ${activitiesHtml}
+
+      ${tip ? `<p style="margin:28px 0 0;padding:16px;background:#fff7ed;border-left:3px solid #ea580c;font-size:14px;line-height:1.6;color:#9a3412;font-family:system-ui,sans-serif;">${tip.replace(/^Mein Tipp/, "<strong>Mein Tipp</strong>")}</p>` : ""}
+
+      <p style="margin:32px 0 0;font-size:15px;line-height:1.6;color:#1e293b;">
+        Den vollständigen Überblick findest du jederzeit im Dashboard unter „Zementa“.
+      </p>
+      <p style="margin:24px 0 0;font-size:15px;line-height:1.5;color:#1e293b;">
+        Einen guten Start in die neue Woche –<br/>
+        <strong>Zementa</strong><br/>
+        <span style="font-size:13px;color:#64748b;">dein Wochenüberblick für ${workshopName}</span>
+      </p>
+    </div>
+    <p style="margin:16px 0 0;text-align:center;font-size:11px;color:#94a3b8;font-family:system-ui,sans-serif;">
+      Diese Nachricht kommt von Zementa aus deiner Werkstatt-App – nicht von Cursor.
+    </p>
+  </div>
+</body>
+</html>`;
+}
+
+export function buildDigestSubject(summary, workshopName = "Kfz-Werkstatt") {
+  const k = summary.kpis;
+  if (k.newCasesCount === 0 && k.completedCount === 0) {
+    return `Zementa · Ruhige Woche bei ${workshopName} (${summary.weekLabel})`;
+  }
+  return `Zementa · Deine Woche: ${k.newCasesCount} neu, ${k.completedCount} erledigt (${summary.weekLabel})`;
 }
 
 export { formatCurrency, STATUS_OPTIONS };
