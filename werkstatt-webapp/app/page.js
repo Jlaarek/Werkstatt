@@ -5,11 +5,12 @@ import {
   CheckCircle2, Clock, Plus, X, Search, Copy, ChevronRight, ChevronLeft,
   Car, FileText, ArrowLeft, LayoutDashboard, Trash2, PhoneIncoming,
   RotateCcw, ShieldAlert, Download, Percent, Eye, EyeOff, User, CalendarClock,
-  Check, LogOut, Lock, RefreshCw, Bot
+  Check, LogOut, Lock, RefreshCw, Bot, ShieldCheck
 } from "lucide-react";
 import { supabase, isSupabaseConfigured } from "../lib/supabaseClient";
 import { useAuth } from "../hooks/useAuth";
 import ZementaView from "../components/ZementaView";
+import CheckerView from "../components/CheckerView";
 
 /* ============================================================
    DATENMODELL - identisch zum Claude-Prototyp, jetzt aber in
@@ -572,6 +573,7 @@ function Dashboard({ session, signOut }) {
     { key: "intake", label: "Anrufannahme", icon: PhoneIncoming },
     { key: "calendar", label: "Termine", icon: Calendar },
     { key: "cases", label: "Fallakten", icon: ClipboardList },
+    { key: "checker", label: "Checker", icon: ShieldCheck },
     { key: "zementa", label: "Zementa", icon: Bot },
   ];
 
@@ -662,6 +664,13 @@ function Dashboard({ session, signOut }) {
                 {view === "cases" && (
                   <CasesListView
                     cases={safeCases} filter={caseFilter} setFilter={setCaseFilter}
+                    openCase={openCase}
+                  />
+                )}
+
+                {view === "checker" && (
+                  <CheckerView
+                    cases={safeCases}
                     openCase={openCase}
                   />
                 )}

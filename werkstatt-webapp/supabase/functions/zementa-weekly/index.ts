@@ -112,6 +112,7 @@ function aggregateWeeklyActivity(cases: Array<Record<string, unknown>>, weekStar
     weekStart: weekStartIso,
     weekEnd: weekEndIso,
     weekLabel: `${formatDateDE(weekStartIso)} – ${formatDateDE(weekEndIso)}`,
+    checker: aggregateCheckerSummary(cases),
     kpis: {
       newCasesCount: newCases.length,
       completedCount: [...new Map(completedCases.map(c => [c.id, c])).values()].length,
@@ -125,6 +126,28 @@ function aggregateWeeklyActivity(cases: Array<Record<string, unknown>>, weekStar
     statusBreakdown,
     activities: activities.slice(0, 50),
   };
+}
+
+function aggregateCheckerSummary(cases: Array<Record<string, unknown>>) {
+  let totalScore = 0;
+  let flagged = 0;
+  let open = 0;
+  for (const c of cases) {
+    const status = String(c.status || "Neu");
+    if (status !== "Abgeschlossen") open++;
+    let score = 100;
+    const customer = (c.customer as Record<string, string>) || {};
+    if (!customer.name?.trim()) score -= 10;
+    if (!String(c.concern || "").trim()) score -= 10;
+    if (c.callback_requested) score -= 15;
+    if (status === "Neu") score -= 20;
+    if (status === "In Prüfung") score -= 10;
+    score = Math.max(0, score);
+    totalScore += score;
+    if (score < 75) flagged++;
+  }
+  const avgScore = cases.length ? Math.round(totalScore / cases.length) : 100;
+  return { avgScore, flaggedCount: flagged, openCases: open };
 }
 
 function buildDigestText(summary: ReturnType<typeof aggregateWeeklyActivity>, workshopName: string) {
@@ -141,6 +164,11 @@ function buildDigestText(summary: ReturnType<typeof aggregateWeeklyActivity>, wo
     `- Offene Rückrufe: ${k.callbacksCount}`,
     `- Angebotsvolumen: ${formatCurrency(k.totalQuoteValue)}`,
     `- Noch offen gesamt: ${k.openAtWeekEnd}`,
+    "",
+    "Checker – Schritt-Bewertung:",
+    `- Qualitäts-Score: ${summary.checker.avgScore}/100`,
+    `- Auffällige Vorgänge: ${summary.checker.flaggedCount}`,
+    `- Noch offen: ${summary.checker.openCases}`,
     "",
     "Im Dashboard unter Zementa findest du den vollständigen Wochenüberblick.",
   ];

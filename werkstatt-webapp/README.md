@@ -85,7 +85,21 @@ und optional per E-Mail.
 
 Ohne E-Mail-Setup funktioniert das **Dashboard sofort** – du siehst alle Wochen-Aktivitäten live in der App.
 
-## 7. Nächste Ausbaustufen (siehe auch Roadmap aus dem Chat)
+## 7. Checker – Schritt-Prüfer (Zementa-Integration)
+
+**Checker** prüft alle Workflow-Schritte deiner Vorgänge und bewertet deren Qualität:
+
+1. **Anlage** – Kundendaten und Anliegen vollständig?
+2. **Prüfung** – Anliegen bearbeitet, Termin angefragt?
+3. **Angebot** – Angebot erstellt und versendet?
+4. **Termin** – Termin bestätigt und termingerecht?
+5. **Abschluss** – Vorgang ordnungsgemäß abgeschlossen?
+
+In der App links **Checker** öffnen → alle Vorgänge mit Score (0–100), Schritt-Status und Auffälligkeiten sehen.
+
+Checker arbeitet **zusammen mit Zementa**: Die Bewertungen fließen automatisch in den wöchentlichen Zementa-Bericht und die E-Mail-Benachrichtigung ein (Qualitäts-Score, auffällige Vorgänge, häufigste Probleme).
+
+## 8. Nächste Ausbaustufen (siehe auch Roadmap aus dem Chat)
 
 Im Code stehen `TODO`-Kommentare an den Stellen, wo später Telefonie,
 Kalender-Sync, Teilekatalog-API und die Claude API angebunden werden können

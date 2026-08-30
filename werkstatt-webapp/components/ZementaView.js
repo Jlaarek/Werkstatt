@@ -4,7 +4,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import {
   Bot, Calendar, CheckCircle2, ClipboardList, FileText, PhoneCall,
   AlertTriangle, Activity, ChevronLeft, ChevronRight, Mail, Send,
-  RefreshCw, BarChart3, Sparkles
+  RefreshCw, BarChart3, Sparkles, ShieldCheck
 } from "lucide-react";
 import { supabase } from "../lib/supabaseClient";
 import {
@@ -16,6 +16,7 @@ import {
   getWeekRange,
   STATUS_OPTIONS,
 } from "../lib/zementa";
+import { aggregateWeeklyChecker, buildCheckerDigestSection } from "../lib/checker";
 
 const DAY_NAMES = ["Sonntag", "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag"];
 
@@ -91,6 +92,11 @@ export default function ZementaView({ cases, openCase, showToast }) {
 
   const summary = useMemo(
     () => aggregateWeeklyActivity(enrichedCases, weekRange.weekStart, weekRange.weekEnd),
+    [enrichedCases, weekRange]
+  );
+
+  const checkerSummary = useMemo(
+    () => aggregateWeeklyChecker(enrichedCases, weekRange.weekStart, weekRange.weekEnd),
     [enrichedCases, weekRange]
   );
 
@@ -187,7 +193,12 @@ export default function ZementaView({ cases, openCase, showToast }) {
     setGenerating(false);
   }
 
-  const digestPreview = buildDigestText(summary, settingsForm.workshop_name);
+  const digestPreview = useMemo(() => {
+    const base = buildDigestText(summary, settingsForm.workshop_name);
+    const checkerLines = buildCheckerDigestSection(checkerSummary);
+    if (!checkerLines.length) return base;
+    return base.replace("\n—\n", `\n${checkerLines.join("\n")}\n—\n`);
+  }, [summary, checkerSummary, settingsForm.workshop_name]);
 
   return (
     <div>
@@ -251,6 +262,50 @@ export default function ZementaView({ cases, openCase, showToast }) {
         <KpiTile icon={AlertTriangle} label="Noch offen" value={summary.kpis.openAtWeekEnd} accent="bg-slate-600" />
         <KpiTile icon={Sparkles} label="Berichte archiviert" value={savedReports.length} accent="bg-slate-700" />
       </div>
+
+      {checkerSummary && (
+        <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 mb-6">
+          <div className="flex items-center gap-2 mb-3">
+            <ShieldCheck size={18} className="text-emerald-700" />
+            <h2 className="font-semibold text-sm text-emerald-800">Checker – Schritt-Bewertung (Zementa-Integration)</h2>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
+            <div>
+              <p className="text-emerald-600 text-xs">Qualitäts-Score</p>
+              <p className="text-xl font-bold text-emerald-900">{checkerSummary.avgScore}/100</p>
+              <p className="text-xs text-emerald-700">{checkerSummary.avgGrade.label}</p>
+            </div>
+            <div>
+              <p className="text-emerald-600 text-xs">Auffällige Vorgänge</p>
+              <p className="text-xl font-bold text-orange-600">{checkerSummary.flaggedCount}</p>
+            </div>
+            <div>
+              <p className="text-emerald-600 text-xs">Noch offen</p>
+              <p className="text-xl font-bold text-emerald-900">{checkerSummary.openCases}</p>
+            </div>
+            <div>
+              <p className="text-emerald-600 text-xs">Häufigstes Problem</p>
+              <p className="text-sm text-emerald-800 truncate">
+                {checkerSummary.topIssues[0]?.text || "Keine"}
+              </p>
+            </div>
+          </div>
+          {checkerSummary.flaggedCases?.length > 0 && (
+            <ul className="mt-3 space-y-1 border-t border-emerald-200 pt-3">
+              {checkerSummary.flaggedCases.slice(0, 3).map(c => (
+                <li key={c.caseId}>
+                  <button
+                    onClick={() => openCase(c.caseId)}
+                    className="text-sm text-emerald-800 hover:text-emerald-950 text-left"
+                  >
+                    {c.customerName} ({c.score} Pkt.) – {c.topIssue || c.status}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
         <div className="lg:col-span-2 bg-white rounded-xl border border-slate-200 shadow-sm">
