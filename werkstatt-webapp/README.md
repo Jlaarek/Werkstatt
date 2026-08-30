@@ -99,7 +99,31 @@ In der App links **Checker** öffnen → alle Vorgänge mit Score (0–100), Sch
 
 Checker arbeitet **zusammen mit Zementa**: Die Bewertungen fließen automatisch in den wöchentlichen Zementa-Bericht und die E-Mail-Benachrichtigung ein (Qualitäts-Score, auffällige Vorgänge, häufigste Probleme).
 
-## 8. Nächste Ausbaustufen (siehe auch Roadmap aus dem Chat)
+## 8. Bot-Suite – Alle Bots verbunden (wie Säp)
+
+Unter **Bots** in der Navigation findest du die gemeinsame Suite:
+
+| Bot | Rolle | Verbindungen |
+|---|---|---|
+| **Säp** | App-Builder | Supabase · GitHub · Netlify |
+| **Checker** | Schritt-Prüfer | Supabase · GitHub · Netlify |
+| **Zementa** | Wochenbericht | Supabase · GitHub · Netlify |
+
+**Ein Stack für alle** (gleiche Konten wie bei Säp):
+
+1. **Supabase** – ein Projekt für Werkstatt-Daten (`schema.sql` + `zementa.sql`) und Säp-Apps (`saep/supabase/schema.sql`)
+2. **GitHub** – dieses Repo + Actions (Zementa-Cron) + Säp-App-Export
+3. **Netlify** – Deploy aus `werkstatt-webapp/` bzw. `saep/` (`netlify.toml` jeweils vorhanden)
+
+Säp starten:
+
+```bash
+cd saep
+cp .env.local.example .env.local   # gleiche SUPABASE_URL + ANON_KEY
+npm install && npm run dev
+```
+
+## 9. Nächste Ausbaustufen (siehe auch Roadmap aus dem Chat)
 
 Im Code stehen `TODO`-Kommentare an den Stellen, wo später Telefonie,
 Kalender-Sync, Teilekatalog-API und die Claude API angebunden werden können

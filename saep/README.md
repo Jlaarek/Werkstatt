@@ -2,6 +2,8 @@
 
 **Säp** verbindet GitHub, Supabase und Netlify: Beschreibe deine Idee, Säp baut die App, speichert sie in Supabase und exportiert sie direkt auf GitHub — bereit für Netlify.
 
+Teil der **Bot-Suite** zusammen mit **Checker** und **Zementa** (siehe Root-`README.md`). Alle drei nutzen dieselben Konten.
+
 ## Schnellstart (mit deinen bestehenden Konten)
 
 ### 1. Supabase verbinden
