@@ -7,6 +7,9 @@
 create table if not exists zementa_settings (
   id uuid primary key default gen_random_uuid(),
   notification_email text not null default '',
+  sender_email text not null default '',
+  sender_name text not null default 'Zementa',
+  recipient_name text not null default 'Johann',
   notify_day smallint not null default 1 check (notify_day between 0 and 6),
   notify_hour smallint not null default 8 check (notify_hour between 0 and 23),
   enabled boolean not null default true,
@@ -49,7 +52,12 @@ drop policy if exists "Mitarbeiter aktualisieren Zementa-Berichte" on zementa_re
 create policy "Mitarbeiter aktualisieren Zementa-Berichte"
   on zementa_reports for update using (auth.role() = 'authenticated');
 
--- Standard-Einstellungen (Montag 08:00, Benachrichtigung aktiv)
-insert into zementa_settings (notification_email, notify_day, notify_hour, enabled)
-select '', 1, 8, true
+-- Standard-Einstellungen (Montag 08:00, Benachrichtigung an deine E-Mail)
+insert into zementa_settings (notification_email, sender_email, sender_name, recipient_name, notify_day, notify_hour, enabled)
+select 'lazarek.johann@gmail.com', 'lazarek.johann@gmail.com', 'Zementa', 'Johann', 1, 8, true
 where not exists (select 1 from zementa_settings limit 1);
+
+-- Falls Tabelle schon existierte: fehlende Spalten nachziehen
+alter table zementa_settings add column if not exists sender_email text not null default '';
+alter table zementa_settings add column if not exists sender_name text not null default 'Zementa';
+alter table zementa_settings add column if not exists recipient_name text not null default 'Johann';

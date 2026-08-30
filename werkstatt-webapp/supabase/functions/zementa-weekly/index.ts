@@ -127,39 +127,172 @@ function aggregateWeeklyActivity(cases: Array<Record<string, unknown>>, weekStar
   };
 }
 
-function buildDigestText(summary: ReturnType<typeof aggregateWeeklyActivity>, workshopName: string) {
+function plural(n: number, one: string, many: string) {
+  return `${n} ${n === 1 ? one : many}`;
+}
+
+function weekIntro(k: { newCasesCount: number; completedCount: number; activityCount: number }) {
+  if (k.newCasesCount === 0 && k.completedCount === 0 && k.activityCount === 0) {
+    return "Diese Woche war es ruhig bei euch – keine großen Bewegungen in den Vorgängen. Manchmal ist genau das die beste Nachricht.";
+  }
+  if (k.completedCount > 0 && k.newCasesCount > 0) {
+    return `Eine produktive Woche liegt hinter euch: ${plural(k.newCasesCount, "neuer Vorgang", "neue Vorgänge")} rein, ${plural(k.completedCount, "Fall", "Fälle")} abgeschlossen. Der Laden läuft.`;
+  }
+  if (k.newCasesCount > 3) {
+    return `Es war eine lebhafte Woche – ${plural(k.newCasesCount, "neuer Vorgang ist", "neue Vorgänge sind")} reingekommen. Gut, dass ihr den Überblick behaltet.`;
+  }
+  if (k.completedCount > 0) {
+    return `Diese Woche konntet ihr ${plural(k.completedCount, "Vorgang", "Vorgänge")} sauber abschließen. Das zählt.`;
+  }
+  return "Hier ist euer kompakter Wochenüberblick – alles Wichtige auf einen Blick.";
+}
+
+function focusHint(k: { callbacksCount: number; openAtWeekEnd: number; quotesCount: number; completedCount: number }) {
+  const hints: string[] = [];
+  if (k.callbacksCount > 0) {
+    hints.push(`${plural(k.callbacksCount, "offener Rückruf wartet", "offene Rückrufe warten")} noch – lohnt sich, das früh am Wochenbeginn anzugehen`);
+  }
+  if (k.openAtWeekEnd > 5) {
+    hints.push(`mit ${k.openAtWeekEnd} offenen Vorgängen lohnt ein kurzer Blick auf die Prioritäten`);
+  }
+  if (k.quotesCount > 0 && k.completedCount === 0) {
+    hints.push("Angebote sind raus – die Nachverfolgung entscheidet oft über den Auftrag");
+  }
+  if (hints.length === 0) return "";
+  return `\n\nMein Tipp für die kommende Woche: ${hints.join("; ")}.`;
+}
+
+function buildDigestText(
+  summary: ReturnType<typeof aggregateWeeklyActivity>,
+  workshopName: string,
+  recipientName: string,
+) {
   const k = summary.kpis;
   const lines = [
-    `Zementa – Wochenbericht ${summary.weekLabel}`,
-    workshopName,
+    `Hallo ${recipientName},`,
     "",
-    "Kennzahlen:",
-    `- Neue Vorgänge: ${k.newCasesCount}`,
-    `- Abgeschlossen: ${k.completedCount}`,
-    `- Termine angefragt: ${k.appointmentsCount}`,
-    `- Angebote erstellt: ${k.quotesCount}`,
-    `- Offene Rückrufe: ${k.callbacksCount}`,
-    `- Angebotsvolumen: ${formatCurrency(k.totalQuoteValue)}`,
-    `- Noch offen gesamt: ${k.openAtWeekEnd}`,
+    weekIntro(k),
     "",
-    "Im Dashboard unter Zementa findest du den vollständigen Wochenüberblick.",
+    `Wochenbericht für ${workshopName}`,
+    `Zeitraum: ${summary.weekLabel}`,
+    "",
+    "─── Kurzüberblick ───",
+    `Neue Vorgänge:        ${k.newCasesCount}`,
+    `Abgeschlossen:        ${k.completedCount}`,
+    `Termine angefragt:    ${k.appointmentsCount}`,
+    `Angebote erstellt:    ${k.quotesCount}`,
+    `Angebotsvolumen:      ${formatCurrency(k.totalQuoteValue)}`,
+    `Offene Rückrufe:      ${k.callbacksCount}`,
+    `Noch offen gesamt:    ${k.openAtWeekEnd}`,
   ];
+
+  const tip = focusHint(k);
+  if (tip) lines.push(tip.trimStart());
+
+  lines.push(
+    "",
+    "Den vollständigen Überblick mit Timeline und Archiv findest du jederzeit im Dashboard unter „Zementa“.",
+    "",
+    "Einen guten Start in die neue Woche –",
+    "Zementa",
+    `dein Wochenüberblick für ${workshopName}`,
+  );
   return lines.join("\n");
 }
 
-async function sendEmail(to: string, subject: string, text: string) {
+function buildDigestHtml(
+  summary: ReturnType<typeof aggregateWeeklyActivity>,
+  workshopName: string,
+  recipientName: string,
+) {
+  const k = summary.kpis;
+  const tip = focusHint(k).trim();
+  const kpiRow = (label: string, value: string | number) => `
+    <tr>
+      <td style="padding:8px 0;border-bottom:1px solid #e2e8f0;color:#475569;font-size:14px;">${label}</td>
+      <td style="padding:8px 0;border-bottom:1px solid #e2e8f0;color:#0f172a;font-size:14px;font-weight:600;text-align:right;">${value}</td>
+    </tr>`;
+
+  return `<!DOCTYPE html>
+<html lang="de">
+<body style="margin:0;padding:0;background:#f1f5f9;font-family:Georgia,'Times New Roman',serif;">
+  <div style="max-width:560px;margin:0 auto;padding:32px 16px;">
+    <div style="background:#ffffff;border-radius:16px;padding:36px 32px;box-shadow:0 1px 3px rgba(15,23,42,0.08);">
+      <p style="margin:0 0 4px;font-size:12px;letter-spacing:0.08em;text-transform:uppercase;color:#ea580c;font-family:system-ui,sans-serif;font-weight:600;">Zementa</p>
+      <h1 style="margin:0 0 8px;font-size:22px;color:#0f172a;font-weight:700;">Dein Wochenbericht</h1>
+      <p style="margin:0 0 24px;font-size:13px;color:#64748b;font-family:system-ui,sans-serif;">${workshopName} · ${summary.weekLabel}</p>
+      <p style="margin:0 0 20px;font-size:16px;line-height:1.65;color:#1e293b;">Hallo ${recipientName},</p>
+      <p style="margin:0 0 28px;font-size:16px;line-height:1.65;color:#1e293b;">${weekIntro(k)}</p>
+      <table style="width:100%;border-collapse:collapse;font-family:system-ui,sans-serif;">
+        ${kpiRow("Neue Vorgänge", k.newCasesCount)}
+        ${kpiRow("Abgeschlossen", k.completedCount)}
+        ${kpiRow("Termine angefragt", k.appointmentsCount)}
+        ${kpiRow("Angebote erstellt", k.quotesCount)}
+        ${kpiRow("Angebotsvolumen", formatCurrency(k.totalQuoteValue))}
+        ${kpiRow("Offene Rückrufe", k.callbacksCount)}
+        ${kpiRow("Noch offen gesamt", k.openAtWeekEnd)}
+      </table>
+      ${tip ? `<p style="margin:28px 0 0;padding:16px;background:#fff7ed;border-left:3px solid #ea580c;font-size:14px;line-height:1.6;color:#9a3412;font-family:system-ui,sans-serif;">${tip.replace(/^Mein Tipp/, "<strong>Mein Tipp</strong>")}</p>` : ""}
+      <p style="margin:32px 0 0;font-size:15px;line-height:1.6;color:#1e293b;">
+        Den vollständigen Überblick findest du jederzeit im Dashboard unter „Zementa“.
+      </p>
+      <p style="margin:24px 0 0;font-size:15px;line-height:1.5;color:#1e293b;">
+        Einen guten Start in die neue Woche –<br/>
+        <strong>Zementa</strong><br/>
+        <span style="font-size:13px;color:#64748b;">dein Wochenüberblick für ${workshopName}</span>
+      </p>
+    </div>
+    <p style="margin:16px 0 0;text-align:center;font-size:11px;color:#94a3b8;font-family:system-ui,sans-serif;">
+      Diese Nachricht kommt von Zementa aus deiner Werkstatt-App – nicht von Cursor.
+    </p>
+  </div>
+</body>
+</html>`;
+}
+
+function buildDigestSubject(summary: ReturnType<typeof aggregateWeeklyActivity>, workshopName: string) {
+  const k = summary.kpis;
+  if (k.newCasesCount === 0 && k.completedCount === 0) {
+    return `Zementa · Ruhige Woche bei ${workshopName} (${summary.weekLabel})`;
+  }
+  return `Zementa · Deine Woche: ${k.newCasesCount} neu, ${k.completedCount} erledigt (${summary.weekLabel})`;
+}
+
+async function sendEmail(opts: {
+  to: string;
+  subject: string;
+  text: string;
+  html: string;
+  replyTo: string;
+  senderName: string;
+}) {
   const resendKey = Deno.env.get("RESEND_API_KEY");
   if (!resendKey) {
     return { sent: false, reason: "RESEND_API_KEY nicht konfiguriert" };
   }
-  const from = Deno.env.get("ZEMENTA_FROM_EMAIL") || "Zementa <zementa@resend.dev>";
+
+  // Technischer Absender (verifizierte Domain bei Resend). Anzeige + Reply-To = deine E-Mail.
+  const deliveryFrom = Deno.env.get("ZEMENTA_FROM_EMAIL") || "Zementa <onboarding@resend.dev>";
+  const displayName = opts.senderName || "Zementa";
+  // Wenn ZEMENTA_FROM_EMAIL schon "Name <mail>" enthält, Name überschreiben
+  const from = deliveryFrom.includes("<")
+    ? deliveryFrom.replace(/^[^<]+/, `${displayName} `)
+    : `${displayName} <${deliveryFrom}>`;
+
   const res = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: {
       Authorization: `Bearer ${resendKey}`,
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ from, to: [to], subject, text }),
+    body: JSON.stringify({
+      from,
+      to: [opts.to],
+      reply_to: opts.replyTo || opts.to,
+      subject: opts.subject,
+      text: opts.text,
+      html: opts.html,
+    }),
   });
   if (!res.ok) {
     const err = await res.text();
@@ -220,7 +353,10 @@ Deno.serve(async (req) => {
 
     const summary = aggregateWeeklyActivity(cases || [], week.weekStart, week.weekEnd);
     const workshopName = settings?.workshop_name || "Kfz-Werkstatt";
-    const digest = buildDigestText(summary, workshopName);
+    const recipientName = settings?.recipient_name || "Johann";
+    const digest = buildDigestText(summary, workshopName, recipientName);
+    const digestHtml = buildDigestHtml(summary, workshopName, recipientName);
+    const subject = buildDigestSubject(summary, workshopName);
 
     const { error: upsertError } = await supabase.from("zementa_reports").upsert({
       week_start: week.weekStart,
@@ -230,14 +366,20 @@ Deno.serve(async (req) => {
 
     if (upsertError) throw upsertError;
 
-    let emailResult = { sent: false, reason: "Keine E-Mail konfiguriert" };
-    const recipient = settings?.notification_email?.trim();
+    let emailResult: { sent: boolean; reason?: string } = { sent: false, reason: "Keine E-Mail konfiguriert" };
+    const recipient = (settings?.notification_email || "lazarek.johann@gmail.com").trim();
+    const replyTo = (settings?.sender_email || settings?.notification_email || recipient).trim();
+    const senderName = settings?.sender_name || "Zementa";
+
     if (recipient && (mode === "cron" || mode === "test")) {
-      emailResult = await sendEmail(
-        recipient,
-        `Zementa Wochenbericht ${summary.weekLabel}`,
-        digest,
-      );
+      emailResult = await sendEmail({
+        to: recipient,
+        subject,
+        text: digest,
+        html: digestHtml,
+        replyTo,
+        senderName,
+      });
       if (emailResult.sent) {
         await supabase.from("zementa_reports")
           .update({ notification_sent_at: new Date().toISOString() })
@@ -247,7 +389,7 @@ Deno.serve(async (req) => {
 
     return new Response(JSON.stringify({
       message: emailResult.sent
-        ? `Wochenbericht ${summary.weekLabel} gesendet an ${recipient}`
+        ? `Wochenbericht ${summary.weekLabel} an ${recipient} gesendet (Reply-To: ${replyTo})`
         : `Wochenbericht ${summary.weekLabel} gespeichert (${emailResult.reason || "ohne E-Mail"})`,
       summary: summary.kpis,
       email: emailResult,
