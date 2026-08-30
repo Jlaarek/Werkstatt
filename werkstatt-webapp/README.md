@@ -69,8 +69,21 @@ Für eine einzelne Werkstatt bleibt das in der Praxis meist dauerhaft im kostenl
 
 ## 6. Zementa – Wöchentlicher Aktivitäts-Bot
 
-Siehe `werkstatt-webapp/README.md` Abschnitt 6 für die vollständige Einrichtung.
-Kurz: `supabase/zementa.sql` ausführen, in der App unter **Zementa** E-Mail konfigurieren.
+**Zementa** ist dein wöchentlicher Überblick über alle Werkstatt-Aktivitäten: neue Vorgänge,
+abgeschlossene Fälle, Termine, Angebote und die komplette Historie – als Dashboard in der App
+und optional per E-Mail.
+
+### Einrichtung (einmalig)
+
+1. Im Supabase **SQL Editor** zusätzlich `supabase/zementa.sql` ausführen (nach `schema.sql`).
+2. In der App links **Zementa** öffnen → E-Mail-Adresse und Wochentag eintragen → speichern.
+3. Optional – automatischer E-Mail-Versand:
+   - Edge Function deployen: `supabase functions deploy zementa-weekly`
+   - Secrets setzen: `RESEND_API_KEY`, `ZEMENTA_CRON_SECRET`, `ZEMENTA_FROM_EMAIL`
+   - GitHub Repository Secrets: `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `ZEMENTA_CRON_SECRET`
+   - Der GitHub Actions Workflow (`.github/workflows/zementa-weekly.yml`) ruft jeden Montag die Function auf.
+
+Ohne E-Mail-Setup funktioniert das **Dashboard sofort** – du siehst alle Wochen-Aktivitäten live in der App.
 
 ## 7. Nächste Ausbaustufen (siehe auch Roadmap aus dem Chat)
 
