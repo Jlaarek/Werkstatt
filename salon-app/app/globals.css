@@ -1,0 +1,50 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --cream: #faf7f5;
+  --rose: #db2777;
+  --ink: #1c1917;
+}
+
+body {
+  background: var(--cream);
+  color: var(--ink);
+  min-height: 100vh;
+}
+
+.hero-wash {
+  background:
+    radial-gradient(ellipse 80% 60% at 20% 0%, rgba(244, 114, 182, 0.35), transparent 55%),
+    radial-gradient(ellipse 70% 50% at 90% 10%, rgba(251, 207, 232, 0.55), transparent 50%),
+    linear-gradient(180deg, #fff5f8 0%, #faf7f5 55%, #f5f0eb 100%);
+}
+
+.soft-panel {
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(219, 39, 119, 0.08);
+}
+
+@keyframes rise {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-rise {
+  animation: rise 0.55s ease-out both;
+}
+
+.animate-rise-delay {
+  animation: rise 0.7s ease-out 0.12s both;
+}
+
+@keyframes shimmer {
+  0%, 100% { opacity: 0.55; }
+  50% { opacity: 1; }
+}
+
+.live-dot {
+  animation: shimmer 2s ease-in-out infinite;
+}
