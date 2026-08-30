@@ -1,39 +1,14 @@
-# SalonFlow — Friseur Probe-App von Säp
+# Salon Hans — Friseur Probe-App (Säp × Hans)
 
-Gebaut nach dem gleichen Datenmuster wie **Geniva/Werkstatt**:
-Services → Termine/Cases → Dashboard — hier für Friseure und Dienstleister.
+Gemeinsam gebaut von **Säp** und **Hans**. Teil der Bot-Suite mit Checker & Zementa.
 
-## Features
-
-- Dashboard (heute, Umsatz, Auslastung)
-- Terminliste mit Status (Neu, Bestätigt, In Arbeit, …)
-- Leistungskatalog (Schnitt, Farbe, Pflege, Styling, Bart)
-- Online-Buchungsanfrage → landet in `salon_appointments`
-
-## Setup
-
-1. In Supabase SQL Editor: `supabase/schema.sql` ausführen
-2. Env setzen:
-
-```bash
-cp ../saep/.env.local .env.local
-# oder manuell:
-# NEXT_PUBLIC_SUPABASE_URL=https://….supabase.co
-# NEXT_PUBLIC_SUPABASE_ANON_KEY=…
-```
-
-3. Starten:
+## Start
 
 ```bash
 npm install
-npm run dev
+npm run dev   # http://localhost:3001
 ```
 
-Öffne http://localhost:3001
+Env: gleiche Supabase-Keys wie Säp / Werkstatt (siehe `.env.local`).
 
-Ohne Supabase-Schema läuft die App mit eingebauten Demo-Daten (Fallback).
-
-## Netlify
-
-- Base directory: `salon-app`
-- Env-Vars: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+Schema: `supabase/schema.sql` (bereits im Werkstatt-Supabase-Projekt seeden).

@@ -103,12 +103,12 @@ INSERT INTO salon_appointments (status, urgency, customer_name, customer_phone, 
 -- ─── Demo-Eintrag für Säp ───────────────────────────────────────
 INSERT INTO apps (user_id, name, prompt, category, app_data) VALUES (
   NULL,
-  'SalonFlow',
-  'Friseur-App mit Terminbuchung, Leistungskatalog, Kundendaten und Dashboard für den Salon',
+  'Salon Hans',
+  'Friseur-App mit Terminbuchung, Leistungskatalog, Kundendaten und Dashboard für den Salon — Säp × Hans',
   'salon',
   '{
-    "name": "SalonFlow",
-    "description": "Friseur-App mit Terminbuchung, Leistungskatalog und Kundendaten",
+    "name": "Salon Hans",
+    "description": "Friseur-App mit Terminbuchung, Leistungskatalog und Kundendaten — Säp × Hans",
     "category": "salon",
     "categoryIcon": "💇",
     "primaryColor": "#db2777",

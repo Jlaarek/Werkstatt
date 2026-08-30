@@ -197,7 +197,7 @@ function extractAppName(text: string, category: string): string {
     werkstatt: "WerkstattPro",
     event: "EventHub",
     health: "HealthCare+",
-    salon: "SalonFlow",
+    salon: "Salon Hans",
     education: "LearnSpace",
     travel: "TravelGo",
     custom: "MeineApp",

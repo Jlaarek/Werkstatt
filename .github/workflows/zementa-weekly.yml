@@ -1,0 +1,26 @@
+name: Zementa Weekly Digest
+
+on:
+  schedule:
+    # Montag 07:00 UTC ≈ 08:00/09:00 MEZ – passt zu Standard-Einstellung (Montag 08:00)
+    - cron: "0 7 * * 1"
+  workflow_dispatch:
+
+jobs:
+  send-digest:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Zementa Edge Function aufrufen
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          ZEMENTA_CRON_SECRET: ${{ secrets.ZEMENTA_CRON_SECRET }}
+        run: |
+          if [ -z "$SUPABASE_URL" ] || [ -z "$ZEMENTA_CRON_SECRET" ]; then
+            echo "SUPABASE_URL oder ZEMENTA_CRON_SECRET nicht gesetzt – überspringe."
+            exit 0
+          fi
+          curl -sf -X POST "${SUPABASE_URL}/functions/v1/zementa-weekly" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}" \
+            -H "Content-Type: application/json" \
+            -H "x-zementa-secret: ${ZEMENTA_CRON_SECRET}" \
+            -d '{"mode":"cron"}'

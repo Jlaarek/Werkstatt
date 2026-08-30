@@ -126,8 +126,8 @@ export default function SalonApp() {
                 ✂
               </div>
               <div>
-                <div className="font-display text-2xl font-semibold tracking-tight text-ink-900">SalonFlow</div>
-                <div className="text-[11px] text-ink-500 tracking-wide uppercase">Probe-App von Säp</div>
+                <div className="font-display text-2xl font-semibold tracking-tight text-ink-900">Salon Hans</div>
+                <div className="text-[11px] text-ink-500 tracking-wide uppercase">Säp × Hans · Probe-App</div>
               </div>
             </div>
             <span className="inline-flex items-center gap-2 text-xs text-ink-500 soft-panel px-3 py-1.5 rounded-full">
@@ -138,12 +138,12 @@ export default function SalonApp() {
 
           <div className="max-w-xl animate-rise">
             <h1 className="font-display text-4xl sm:text-5xl font-semibold leading-[1.1] text-ink-900 mb-4">
-              Dein Salon.<br />
+              Salon Hans.<br />
               <span className="text-salon-600">Termine im Griff.</span>
             </h1>
             <p className="text-ink-500 text-base leading-relaxed mb-6">
-              Leistungskatalog, Terminbuchung und Tagesübersicht — gebaut von Säp
-              nach dem gleichen Muster wie Geniva, nur für Friseure und Dienstleister.
+              Säp und Hans bauen zusammen: Leistungskatalog, Terminbuchung und Tagesübersicht —
+              nach dem Geniva-Muster, für Friseure und Dienstleister.
             </p>
             <div className="flex flex-wrap gap-3">
               <button
@@ -385,8 +385,8 @@ export default function SalonApp() {
 
       <footer className="border-t border-stone-200 mt-12 py-8 px-4 text-center">
         <p className="text-xs text-ink-500">
-          SalonFlow — Probe-App von <span className="text-salon-600 font-medium">Säp</span>
-          {" "}· Struktur analog Geniva/Werkstatt (Services · Termine · Dashboard)
+          Salon Hans — gebaut von <span className="text-salon-600 font-medium">Säp × Hans</span>
+          {" "}· Bot-Suite mit Checker & Zementa · GitHub · Supabase · Netlify
         </p>
       </footer>
     </div>

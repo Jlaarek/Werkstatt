@@ -306,7 +306,7 @@ export function SaepBuilder() {
       <footer className="border-t border-white/5 py-8 px-4">
         <div className="max-w-3xl mx-auto text-center">
           <p className="text-xs text-white/30">
-            Säp — Aus allem eine App. GitHub · Supabase · Netlify
+            Säp × Hans — Aus allem eine App. Checker · Zementa · GitHub · Supabase · Netlify
           </p>
         </div>
       </footer>

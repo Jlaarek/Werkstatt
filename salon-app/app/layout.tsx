@@ -15,9 +15,9 @@ const dmSans = DM_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "SalonFlow — Friseur-Terminverwaltung",
+  title: "Salon Hans — Friseur-Terminverwaltung",
   description:
-    "Probe-App von Säp: Terminbuchung, Leistungskatalog und Dashboard für Friseursalons und Dienstleister.",
+    "Probe-App von Säp × Hans: Terminbuchung, Leistungskatalog und Dashboard für Friseursalons.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
